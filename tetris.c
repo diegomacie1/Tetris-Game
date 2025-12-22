@@ -23,7 +23,6 @@ void drawMap(wchar_t map[ROWS][COLS]);
 int gameMenu();
 bool isWall(wchar_t character);
 void clearScreen();
-void handleInput(char *direction);
 void enableRawMode();
 void disableRawMode();
 int kbhit();
@@ -63,22 +62,22 @@ int main(){
 
 void setupMap(wchar_t map[ROWS][COLS]) {
 
-                                                                                wchar_t Layout[ROWS][COLS + 1] = {
-                                                                                L"┏━━━━━━━━━━━━━━━━━━━━━━━┓",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┗━━━━━━━━━━━━━━━━━━━━━━━┛",
+        wchar_t Layout[ROWS][COLS + 1] = {
+        L"┏━━━━━━━━━━━━━━━━━━━━━━━┓",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┗━━━━━━━━━━━━━━━━━━━━━━━┛",
 
     };
 
