@@ -22,8 +22,9 @@ void setupMap(wchar_t map[ROWS][COLS]);
 void drawMap(wchar_t map[ROWS][COLS]);
 int gameMenu();
 bool isWall(wchar_t character);
+void Instructions();
 void clearScreen();
-void handleInput(char *direction);
+char gameOverScreen();
 void enableRawMode();
 void disableRawMode();
 int kbhit();
@@ -37,18 +38,27 @@ int main(){
     srand(time(NULL)); 
     wchar_t map[ROWS][COLS];
     bool gameIsRunning = true;
+    bool gameOver = false;
+
     
     while (gameIsRunning)
     {
         int gamersChoice = gameMenu();
+        setupMap(map);
         if (gamersChoice == 1)
         {
-            setupMap(map);
-            drawMap(map);
+            while (!gameOver)
+            {
+                drawMap(map);
+            }
+            
         }
         if (gamersChoice == 2)
         {
-            
+            Instructions();
+            clearScreen();
+            gameOverScreen();
+            continue;
         }
         if (gamersChoice == 3)
         {
@@ -63,22 +73,22 @@ int main(){
 
 void setupMap(wchar_t map[ROWS][COLS]) {
 
-                                                                                wchar_t Layout[ROWS][COLS + 1] = {
-                                                                                L"┏━━━━━━━━━━━━━━━━━━━━━━━┓",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┃                       ┃",
-                                                                                L"┗━━━━━━━━━━━━━━━━━━━━━━━┛",
+        wchar_t Layout[ROWS][COLS + 1] = {
+        L"┏━━━━━━━━━━━━━━━━━━━━━━━┓",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┃                       ┃",
+        L"┗━━━━━━━━━━━━━━━━━━━━━━━┛",
 
     };
 
@@ -115,6 +125,8 @@ void drawMap(wchar_t map[ROWS][COLS]) {
 
 int gameMenu(){
 
+    clearScreen();
+
     wprintf(L"T E T R I S\n\n\n\n");
     wprintf(L"[1] - Play game.\n\n");
     wprintf(L"[2] - See Instructions.\n\n");
@@ -122,19 +134,20 @@ int gameMenu(){
     
     while (true)
     {
-        char playerChoice = getchar();
-        if (playerChoice == '1')
+        char playerchoice = getchar();
+        if (playerchoice == '1')
         {
             return 1;
         }
-        if (playerChoice == '2')
+        if (playerchoice == '2')
         {
             return 2;
         }
-        if (playerChoice == '3')
+        if (playerchoice == '3')
         {
             return 3;
         }
+        usleep(100000); 
     }
 }
 
@@ -143,8 +156,81 @@ bool isWall(wchar_t character) {
     return character == L'┏' || character == L'┓' || character == L'┗' || character == L'┛' || character == L'━' || character == L'┃';
 }
 
+void Instructions(){
+
+    clearScreen();
+
+    wprintf(L"┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
+    wprintf(L"┃           T E T R I S           ┃\n");
+    wprintf(L"┃                                 ┃\n");
+    wprintf(L"┃  [UP ARROW] - Rotate            ┃\n");
+    wprintf(L"┃                                 ┃\n");
+    wprintf(L"┃  [LEFT ARROW] - Move Left       ┃\n");
+    wprintf(L"┃                                 ┃\n");
+    wprintf(L"┃  [RIGHT ARROW] - Move Right     ┃\n");
+    wprintf(L"┃                                 ┃\n");
+    wprintf(L"┃  [DOWN ARROW] - Move Down Faster┃\n");
+    wprintf(L"┃                                 ┃\n");
+    wprintf(L"┃  [Q] - To Pause The Game        ┃\n");
+    wprintf(L"┃                                 ┃\n");
+    wprintf(L"┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
+    wprintf(L"\n\n");
+    wprintf(L"PRESS ANY KEY TO LEAVE THIS SCREEN.\n\n");
+
+    while (kbhit())
+    {
+        getchar();
+    }
+    getchar();
+}
+
 void clearScreen() {
     wprintf(L"\x1b[2J\x1b[3J\x1b[H"); // 2J = Clear Screen, 3J = Clear History, H = Go Home
+}
+
+char gameOverScreen(){
+
+    clearScreen();
+
+    wprintf(L"        GGGGGGGGGGGGG               AAA               MMMMMMMM               MMMMMMMMEEEEEEEEEEEEEEEEEEEEEE          OOOOOOOOO     VVVVVVVV           VVVVVVVVEEEEEEEEEEEEEEEEEEEEEERRRRRRRRRRRRRRRRR\n");
+    wprintf(L"     GGG::::::::::::G              A:::A              M:::::::M             M:::::::ME::::::::::::::::::::E        OO:::::::::OO   V::::::V           V::::::VE::::::::::::::::::::ER::::::::::::::::R\n");
+    wprintf(L"   GG:::::::::::::::G             A:::::A             M::::::::M           M::::::::ME::::::::::::::::::::E      OO:::::::::::::OO V::::::V           V::::::VE::::::::::::::::::::ER::::::RRRRRR:::::R\n");
+    wprintf(L"  G:::::GGGGGGGG::::G            A:::::::A            M:::::::::M         M:::::::::MEE::::::EEEEEEEEE::::E     O:::::::OOO:::::::OV::::::V           V::::::VEE::::::EEEEEEEEE::::ERR:::::R     R:::::R\n");
+    wprintf(L" G:::::G       GGGGGG           A:::::::::A           M::::::::::M       M::::::::::M  E:::::E       EEEEEE     O::::::O   O::::::O V:::::V           V:::::V   E:::::E       EEEEEE  R::::R     R:::::R\n");
+    wprintf(L"G:::::G                        A:::::A:::::A          M:::::::::::M     M:::::::::::M  E:::::E                  O:::::O     O:::::O  V:::::V         V:::::V    E:::::E               R::::R     R:::::R\n");
+    wprintf(L"G:::::G                       A:::::A A:::::A         M:::::::M::::M   M::::M:::::::M  E::::::EEEEEEEEEE        O:::::O     O:::::O   V:::::V       V:::::V     E::::::EEEEEEEEEE     R::::RRRRRR:::::R\n");
+    wprintf(L"G:::::G    GGGGGGGGGG        A:::::A   A:::::A        M::::::M M::::M M::::M M::::::M  E:::::::::::::::E        O:::::O     O:::::O    V:::::V     V:::::V      E:::::::::::::::E     R:::::::::::::RR\n");
+    wprintf(L"G:::::G    G::::::::G       A:::::A     A:::::A       M::::::M  M::::M::::M  M::::::M  E:::::::::::::::E        O:::::O     O:::::O     V:::::V   V:::::V       E:::::::::::::::E     R::::RRRRRR:::::R\n");
+    wprintf(L"G:::::G    GGGGG::::G      A:::::AAAAAAAAA:::::A      M::::::M   M:::::::M   M::::::M  E::::::EEEEEEEEEE        O:::::O     O:::::O      V:::::V V:::::V        E::::::EEEEEEEEEE     R::::R     R:::::R\n");
+    wprintf(L"G:::::G        G::::G     A:::::::::::::::::::::A     M::::::M    M:::::M    M::::::M  E:::::E                  O:::::O     O:::::O       V:::::V:::::V         E:::::E               R::::R     R:::::R\n");
+    wprintf(L" G:::::G       G::::G    A:::::AAAAAAAAAAAAA:::::A    M::::::M     MMMMM     M::::::M  E:::::E       EEEEEE     O::::::O   O::::::O        V:::::::::V          E:::::E       EEEEEE  R::::R     R:::::R\n");
+    wprintf(L"  G:::::GGGGGGGG::::G   A:::::A             A:::::A   M::::::M               M::::::MEE::::::EEEEEEEE:::::E     O:::::::OOO:::::::O         V:::::::V         EE::::::EEEEEEEE:::::ERR:::::R     R:::::R\n");
+    wprintf(L"   GG:::::::::::::::G  A:::::A               A:::::A  M::::::M               M::::::ME::::::::::::::::::::E      OO:::::::::::::OO           V:::::V          E::::::::::::::::::::ER::::::R     R:::::R\n");
+    wprintf(L"     GGG::::::GGG:::G A:::::A                 A:::::A M::::::M               M::::::ME::::::::::::::::::::E        OO:::::::::OO              V:::V           E::::::::::::::::::::ER::::::R     R:::::R\n");
+    wprintf(L"        GGGGGG   GGGGAAAAAAA                   AAAAAAAMMMMMMMM               MMMMMMMMEEEEEEEEEEEEEEEEEEEEEE          OOOOOOOOO                 VVV            EEEEEEEEEEEEEEEEEEEEEERRRRRRRR     RRRRRRR\n");    
+    wprintf(L"\n\n\n\n");
+
+    wprintf(L"                                                                                    SELECT AN OPTION:\n\n");
+    wprintf(L"                                                                                            [1] - Play Again.\n\n");
+    wprintf(L"                                                                                            [2] - Return to the Main Menu.\n\n");
+    wprintf(L"                                                                                            [3] - Quit\n\n");
+
+    while (true)
+    {
+        char playerchoice = getchar();
+        if (playerchoice == '1') // Play again
+        {
+            return 1;
+        }
+        if (playerchoice == '2') // Return to the menu
+        {
+            return 2;
+        }
+        if (playerchoice == '3') // Quit
+        {
+            return 3;
+        }
+    }
 }
 
 // Enable "Raw Mode" (disable waiting for Enter)
