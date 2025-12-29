@@ -19,6 +19,13 @@
 #define COLOR_YELLOW  L"\x1b[33m"
 #define COLOR_BLUE    L"\x1b[34m"
 
+typedef struct {
+    int x;          // Horizontal position on the map (0 to COLS)
+    int y;          // Vertical position on the map (0 to ROWS)
+    int shapeIndex; // For the current shape
+    int rotation;   // which rotation now?
+} Tetromino;
+
 void setupMap(wchar_t map[ROWS][COLS]);
 void drawMap(wchar_t map[ROWS][COLS]);
 int gameMenu();
@@ -157,12 +164,10 @@ int gameMenu(){
     }
 }
 
-/*int playing() {
+void playing() {
 
 
-    return;
-}*/
-
+}
 // Function to detect the walls
 bool isWall(wchar_t character) {
     return character == L'┏' || character == L'┓' || character == L'┗' || character == L'┛' || character == L'━' || character == L'┃';
@@ -232,18 +237,87 @@ char gameOverScreen(){
         char playerchoice = getchar();
         if (playerchoice == '1') // Play again
         {
+            clearScreen();
             return 1;
         }
         if (playerchoice == '2') // Return to the menu
         {
+            clearScreen();
             return 2;
         }
         if (playerchoice == '3') // Quit
         {
+            clearScreen();
             return 3;
         }
     }
 }
+
+const int TETROMINOES[5][4][4][4] = { // [Number of Shapes][Number of Rotations][Height][Width]
+    // Shape 1: The "Pyramid" (T-Shape)
+    {
+        // Rotation 0 (Standard)
+        {
+            {0, 1, 0, 0},
+            {1, 1, 1, 0},
+            {0, 0, 0, 0},
+            {0, 0, 0, 0}
+        },
+        // Rotation 1 (90 degrees)
+        {
+            {0, 1, 0, 0},
+            {0, 1, 1, 0},
+            {0, 1, 0, 0},
+            {0, 0, 0, 0}
+        },
+        // Rotation 2 (180 degress)
+        {
+            {0, 0, 0, 0},
+            {1, 1, 1, 0},
+            {0, 1, 0, 0},
+            {0, 0, 0, 0}
+        },
+        // Rotation 3 (270 degress)
+        {
+            {0, 1, 0, 0},
+            {1, 1, 0, 0},
+            {0, 1, 0, 0},
+            {0, 0, 0, 0}
+        },
+    },
+    
+    // Shape 2: The Square
+    {
+        // All rotations are the same, since it's a square
+       {
+            {0, 1, 1, 0},
+            {0, 1, 1, 0},
+            {0, 0, 0, 0},
+            {0, 0, 0, 0}
+        },
+
+        {
+            {0, 1, 1, 0},
+            {0, 1, 1, 0},
+            {0, 0, 0, 0},
+            {0, 0, 0, 0}
+        },
+
+        {
+            {0, 1, 1, 0},
+            {0, 1, 1, 0},
+            {0, 0, 0, 0},
+            {0, 0, 0, 0}
+        },
+
+        {
+            {0, 1, 1, 0},
+            {0, 1, 1, 0},
+            {0, 0, 0, 0},
+            {0, 0, 0, 0}
+        },
+    }
+};
 
 // Enable "Raw Mode" (disable waiting for Enter)
 void enableRawMode() {
