@@ -9,20 +9,30 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 
-#define ROWS 15
-#define COLS 25
+#define ROWS 16
+#define COLS 56
 #define EMPTY L' '
 #define COLOR_RESET   L"\x1b[0m"
+#define COLOR_BLACK   L"\x1b[40m"
 #define COLOR_RED     L"\x1b[31m"
 #define COLOR_GREEN   L"\x1b[32m"
 #define COLOR_YELLOW  L"\x1b[33m"
 #define COLOR_BLUE    L"\x1b[34m"
 
+typedef struct {
+    int x;          // Horizontal position on the map (0 to COLS)
+    int y;          // Vertical position on the map (0 to ROWS)
+    int shapeIndex; // For the current shape
+    int rotation;   // which rotation now?
+} Tetromino;
+
 void setupMap(wchar_t map[ROWS][COLS]);
 void drawMap(wchar_t map[ROWS][COLS]);
 int gameMenu();
 bool isWall(wchar_t character);
+void Instructions();
 void clearScreen();
+char gameOverScreen();
 void enableRawMode();
 void disableRawMode();
 int kbhit();
@@ -36,18 +46,27 @@ int main(){
     srand(time(NULL)); 
     wchar_t map[ROWS][COLS];
     bool gameIsRunning = true;
+    bool gameOver = false;
+
     
     while (gameIsRunning)
     {
         int gamersChoice = gameMenu();
+        setupMap(map);
         if (gamersChoice == 1)
         {
-            setupMap(map);
-            drawMap(map);
+            while (!gameOver)
+            {
+                drawMap(map);
+            }
+            
         }
         if (gamersChoice == 2)
         {
-            
+            Instructions();
+            clearScreen();
+            gameOverScreen();
+            continue;
         }
         if (gamersChoice == 3)
         {
@@ -62,22 +81,23 @@ int main(){
 
 void setupMap(wchar_t map[ROWS][COLS]) {
 
-        wchar_t Layout[ROWS][COLS + 1] = {
-        L"┏━━━━━━━━━━━━━━━━━━━━━━━┓",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┗━━━━━━━━━━━━━━━━━━━━━━━┛",
+    wchar_t Layout[ROWS][COLS + 1] = {
+        L"┏━━━━━━━━━━━━━━━━━━━━━━━┓              ┏━━━━━━━━━━━━━━━┓",
+        L"┃                       ┃              ┃ Next in queue ┃",
+        L"┃                       ┃              ┃               ┃",
+        L"┃                       ┃              ┃               ┃",
+        L"┃                       ┃              ┃               ┃",
+        L"┃                       ┃              ┗━━━━━━━━━━━━━━━┛",
+        L"┃                       ┃                               ",
+        L"┃                       ┃                               ",
+        L"┃                       ┃                               ",
+        L"┃                       ┃                               ",
+        L"┃                       ┃                               ",
+        L"┃                       ┃                               ",
+        L"┃                       ┃                               ",
+        L"┃                       ┃                               ",
+        L"┃                       ┃                               ",
+        L"┗━━━━━━━━━━━━━━━━━━━━━━━┛                               ",
 
     };
 
@@ -104,7 +124,11 @@ void drawMap(wchar_t map[ROWS][COLS]) {
             }
             else if (tile == EMPTY) 
             {
-                wprintf(L"%lc", tile);
+                wprintf(L"%ls%lc", COLOR_RESET, tile);
+            }
+            else 
+            {
+                wprintf(L"%ls%lc", COLOR_RESET, tile); 
             }
             
         }
@@ -114,27 +138,35 @@ void drawMap(wchar_t map[ROWS][COLS]) {
 
 int gameMenu(){
 
+    wprintf(L" %ls\n", COLOR_BLACK);
     wprintf(L"T E T R I S\n\n\n\n");
     wprintf(L"[1] - Play game.\n\n");
     wprintf(L"[2] - See Instructions.\n\n");
     wprintf(L"[3] - Quit.\n\n");
+    wprintf(L"%ls", COLOR_RESET);
     
     while (true)
     {
-        char playerChoice = getchar();
-        if (playerChoice == '1')
+        char playerchoice = getchar();
+        if (playerchoice == '1')
         {
             return 1;
         }
-        if (playerChoice == '2')
+        if (playerchoice == '2')
         {
             return 2;
         }
-        if (playerChoice == '3')
+        if (playerchoice == '3')
         {
             return 3;
         }
+        usleep(100000); 
     }
+}
+
+void playing() {
+
+
 }
 
 // Function to detect the walls
@@ -142,9 +174,148 @@ bool isWall(wchar_t character) {
     return character == L'┏' || character == L'┓' || character == L'┗' || character == L'┛' || character == L'━' || character == L'┃';
 }
 
+void Instructions(){
+
+    clearScreen();
+
+    wprintf(L"┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
+    wprintf(L"┃           T E T R I S           ┃\n");
+    wprintf(L"┃                                 ┃\n");
+    wprintf(L"┃  [UP ARROW] - Rotate            ┃\n");
+    wprintf(L"┃                                 ┃\n");
+    wprintf(L"┃  [LEFT ARROW] - Move Left       ┃\n");
+    wprintf(L"┃                                 ┃\n");
+    wprintf(L"┃  [RIGHT ARROW] - Move Right     ┃\n");
+    wprintf(L"┃                                 ┃\n");
+    wprintf(L"┃  [DOWN ARROW] - Move Down Faster┃\n");
+    wprintf(L"┃                                 ┃\n");
+    wprintf(L"┃  [Q] - To Pause The Game        ┃\n");
+    wprintf(L"┃                                 ┃\n");
+    wprintf(L"┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
+    wprintf(L"\n\n");
+    wprintf(L"PRESS ANY KEY TO LEAVE THIS SCREEN.\n\n");
+
+    while (kbhit())
+    {
+        getchar();
+    }
+    getchar();
+}
+
 void clearScreen() {
     wprintf(L"\x1b[2J\x1b[3J\x1b[H"); // 2J = Clear Screen, 3J = Clear History, H = Go Home
 }
+
+char gameOverScreen(){
+
+    clearScreen();
+
+    wprintf(L"        GGGGGGGGGGGGG               AAA               MMMMMMMM               MMMMMMMMEEEEEEEEEEEEEEEEEEEEEE          OOOOOOOOO     VVVVVVVV           VVVVVVVVEEEEEEEEEEEEEEEEEEEEEERRRRRRRRRRRRRRRRR\n");
+    wprintf(L"     GGG::::::::::::G              A:::A              M:::::::M             M:::::::ME::::::::::::::::::::E        OO:::::::::OO   V::::::V           V::::::VE::::::::::::::::::::ER::::::::::::::::R\n");
+    wprintf(L"   GG:::::::::::::::G             A:::::A             M::::::::M           M::::::::ME::::::::::::::::::::E      OO:::::::::::::OO V::::::V           V::::::VE::::::::::::::::::::ER::::::RRRRRR:::::R\n");
+    wprintf(L"  G:::::GGGGGGGG::::G            A:::::::A            M:::::::::M         M:::::::::MEE::::::EEEEEEEEE::::E     O:::::::OOO:::::::OV::::::V           V::::::VEE::::::EEEEEEEEE::::ERR:::::R     R:::::R\n");
+    wprintf(L" G:::::G       GGGGGG           A:::::::::A           M::::::::::M       M::::::::::M  E:::::E       EEEEEE     O::::::O   O::::::O V:::::V           V:::::V   E:::::E       EEEEEE  R::::R     R:::::R\n");
+    wprintf(L"G:::::G                        A:::::A:::::A          M:::::::::::M     M:::::::::::M  E:::::E                  O:::::O     O:::::O  V:::::V         V:::::V    E:::::E               R::::R     R:::::R\n");
+    wprintf(L"G:::::G                       A:::::A A:::::A         M:::::::M::::M   M::::M:::::::M  E::::::EEEEEEEEEE        O:::::O     O:::::O   V:::::V       V:::::V     E::::::EEEEEEEEEE     R::::RRRRRR:::::R\n");
+    wprintf(L"G:::::G    GGGGGGGGGG        A:::::A   A:::::A        M::::::M M::::M M::::M M::::::M  E:::::::::::::::E        O:::::O     O:::::O    V:::::V     V:::::V      E:::::::::::::::E     R:::::::::::::RR\n");
+    wprintf(L"G:::::G    G::::::::G       A:::::A     A:::::A       M::::::M  M::::M::::M  M::::::M  E:::::::::::::::E        O:::::O     O:::::O     V:::::V   V:::::V       E:::::::::::::::E     R::::RRRRRR:::::R\n");
+    wprintf(L"G:::::G    GGGGG::::G      A:::::AAAAAAAAA:::::A      M::::::M   M:::::::M   M::::::M  E::::::EEEEEEEEEE        O:::::O     O:::::O      V:::::V V:::::V        E::::::EEEEEEEEEE     R::::R     R:::::R\n");
+    wprintf(L"G:::::G        G::::G     A:::::::::::::::::::::A     M::::::M    M:::::M    M::::::M  E:::::E                  O:::::O     O:::::O       V:::::V:::::V         E:::::E               R::::R     R:::::R\n");
+    wprintf(L" G:::::G       G::::G    A:::::AAAAAAAAAAAAA:::::A    M::::::M     MMMMM     M::::::M  E:::::E       EEEEEE     O::::::O   O::::::O        V:::::::::V          E:::::E       EEEEEE  R::::R     R:::::R\n");
+    wprintf(L"  G:::::GGGGGGGG::::G   A:::::A             A:::::A   M::::::M               M::::::MEE::::::EEEEEEEE:::::E     O:::::::OOO:::::::O         V:::::::V         EE::::::EEEEEEEE:::::ERR:::::R     R:::::R\n");
+    wprintf(L"   GG:::::::::::::::G  A:::::A               A:::::A  M::::::M               M::::::ME::::::::::::::::::::E      OO:::::::::::::OO           V:::::V          E::::::::::::::::::::ER::::::R     R:::::R\n");
+    wprintf(L"     GGG::::::GGG:::G A:::::A                 A:::::A M::::::M               M::::::ME::::::::::::::::::::E        OO:::::::::OO              V:::V           E::::::::::::::::::::ER::::::R     R:::::R\n");
+    wprintf(L"        GGGGGG   GGGGAAAAAAA                   AAAAAAAMMMMMMMM               MMMMMMMMEEEEEEEEEEEEEEEEEEEEEE          OOOOOOOOO                 VVV            EEEEEEEEEEEEEEEEEEEEEERRRRRRRR     RRRRRRR\n");    
+    wprintf(L"\n\n\n\n");
+
+    wprintf(L"                                                                                    SELECT AN OPTION:\n\n");
+    wprintf(L"                                                                                            [1] - Play Again.\n\n");
+    wprintf(L"                                                                                            [2] - Return to the Main Menu.\n\n");
+    wprintf(L"                                                                                            [3] - Quit\n\n");
+
+    while (true)
+    {
+        char playerchoice = getchar();
+        if (playerchoice == '1') // Play again
+        {
+            clearScreen();
+            return 1;
+        }
+        if (playerchoice == '2') // Return to the menu
+        {
+            clearScreen();
+            return 2;
+        }
+        if (playerchoice == '3') // Quit
+        {
+            clearScreen();
+            return 3;
+        }
+    }
+}
+
+const int TETROMINOES[5][4][4][4] = { // [Number of Shapes][Number of Rotations][Height][Width]
+    // Shape 1: The "Pyramid" (T-Shape)
+    {
+        // Rotation 0 (Standard)
+        {
+            {0, 1, 0, 0},
+            {1, 1, 1, 0},
+            {0, 0, 0, 0},
+            {0, 0, 0, 0}
+        },
+        // Rotation 1 (90 degrees)
+        {
+            {0, 1, 0, 0},
+            {0, 1, 1, 0},
+            {0, 1, 0, 0},
+            {0, 0, 0, 0}
+        },
+        // Rotation 2 (180 degress)
+        {
+            {0, 0, 0, 0},
+            {1, 1, 1, 0},
+            {0, 1, 0, 0},
+            {0, 0, 0, 0}
+        },
+        // Rotation 3 (270 degress)
+        {
+            {0, 1, 0, 0},
+            {1, 1, 0, 0},
+            {0, 1, 0, 0},
+            {0, 0, 0, 0}
+        },
+    },
+    
+    // Shape 2: The Square
+    {
+        // All rotations are the same, since it's a square
+       {
+            {0, 1, 1, 0},
+            {0, 1, 1, 0},
+            {0, 0, 0, 0},
+            {0, 0, 0, 0}
+        },
+        {
+            {0, 1, 1, 0},
+            {0, 1, 1, 0},
+            {0, 0, 0, 0},
+            {0, 0, 0, 0}
+        },
+        {
+            {0, 1, 1, 0},
+            {0, 1, 1, 0},
+            {0, 0, 0, 0},
+            {0, 0, 0, 0}
+        },
+        {
+            {0, 1, 1, 0},
+            {0, 1, 1, 0},
+            {0, 0, 0, 0},
+            {0, 0, 0, 0}
+        },
+    }
+};
 
 // Enable "Raw Mode" (disable waiting for Enter)
 void enableRawMode() {
