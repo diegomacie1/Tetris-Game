@@ -9,10 +9,11 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 
-#define ROWS 15
-#define COLS 25
+#define ROWS 16
+#define COLS 56
 #define EMPTY L' '
 #define COLOR_RESET   L"\x1b[0m"
+#define COLOR_BLACK   L"\x1b[40m"
 #define COLOR_RED     L"\x1b[31m"
 #define COLOR_GREEN   L"\x1b[32m"
 #define COLOR_YELLOW  L"\x1b[33m"
@@ -73,22 +74,23 @@ int main(){
 
 void setupMap(wchar_t map[ROWS][COLS]) {
 
-        wchar_t Layout[ROWS][COLS + 1] = {
-        L"┏━━━━━━━━━━━━━━━━━━━━━━━┓",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┃                       ┃",
-        L"┗━━━━━━━━━━━━━━━━━━━━━━━┛",
+    wchar_t Layout[ROWS][COLS + 1] = {
+        L"┏━━━━━━━━━━━━━━━━━━━━━━━┓              ┏━━━━━━━━━━━━━━━┓",
+        L"┃                       ┃              ┃ Next in queue ┃",
+        L"┃                       ┃              ┃               ┃",
+        L"┃                       ┃              ┃               ┃",
+        L"┃                       ┃              ┃               ┃",
+        L"┃                       ┃              ┗━━━━━━━━━━━━━━━┛",
+        L"┃                       ┃                               ",
+        L"┃                       ┃                               ",
+        L"┃                       ┃                               ",
+        L"┃                       ┃                               ",
+        L"┃                       ┃                               ",
+        L"┃                       ┃                               ",
+        L"┃                       ┃                               ",
+        L"┃                       ┃                               ",
+        L"┃                       ┃                               ",
+        L"┗━━━━━━━━━━━━━━━━━━━━━━━┛                               ",
 
     };
 
@@ -115,7 +117,11 @@ void drawMap(wchar_t map[ROWS][COLS]) {
             }
             else if (tile == EMPTY) 
             {
-                wprintf(L"%lc", tile);
+                wprintf(L"%ls%lc", COLOR_RESET, tile);
+            }
+            else 
+            {
+                wprintf(L"%ls%lc", COLOR_RESET, tile); 
             }
             
         }
@@ -125,12 +131,12 @@ void drawMap(wchar_t map[ROWS][COLS]) {
 
 int gameMenu(){
 
-    clearScreen();
-
+    wprintf(L" %ls\n", COLOR_BLACK);
     wprintf(L"T E T R I S\n\n\n\n");
     wprintf(L"[1] - Play game.\n\n");
     wprintf(L"[2] - See Instructions.\n\n");
     wprintf(L"[3] - Quit.\n\n");
+    wprintf(L"%ls", COLOR_RESET);
     
     while (true)
     {
@@ -150,6 +156,12 @@ int gameMenu(){
         usleep(100000); 
     }
 }
+
+/*int playing() {
+
+
+    return;
+}*/
 
 // Function to detect the walls
 bool isWall(wchar_t character) {
