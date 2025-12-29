@@ -168,7 +168,6 @@ void playing() {
 
 
 }
-
 // Function to detect the walls
 bool isWall(wchar_t character) {
     return character == L'┏' || character == L'┓' || character == L'┗' || character == L'┛' || character == L'━' || character == L'┃';
@@ -296,18 +295,21 @@ const int TETROMINOES[5][4][4][4] = { // [Number of Shapes][Number of Rotations]
             {0, 0, 0, 0},
             {0, 0, 0, 0}
         },
+
         {
             {0, 1, 1, 0},
             {0, 1, 1, 0},
             {0, 0, 0, 0},
             {0, 0, 0, 0}
         },
+
         {
             {0, 1, 1, 0},
             {0, 1, 1, 0},
             {0, 0, 0, 0},
             {0, 0, 0, 0}
         },
+
         {
             {0, 1, 1, 0},
             {0, 1, 1, 0},
